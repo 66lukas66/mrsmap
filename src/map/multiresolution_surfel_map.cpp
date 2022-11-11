@@ -46,7 +46,6 @@
 
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
-
 #include <ostream>
 #include <fstream>
 
@@ -906,8 +905,12 @@ void MultiResolutionSurfelMap::addImagePointFeatures( const cv::Mat& img, const 
 	//CV_WRAP explicit ORB(int nfeatures = 500, float scaleFactor = 1.2f, int nlevels = 8, int edgeThreshold = 31,
     //int firstLevel = 0, int WTA_K=2, int scoreType=ORB::HARRIS_SCORE, int patchSize=31 );
 
-	cv::ORB orb( params_.numPointFeatures, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31 );
+    //orginal
+    //cv::ORB orb (params_.numPointFeatures, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31);
+    cv::Ptr<cv::ORB> orb = cv::ORB::create(params_.numPointFeatures);
 
+
+   // cv::Ptr<ORB> orb = cv::ORB::create(params_.numPointFeatures, 1.2f, 8, 31, 0, 2, cv::ORB::HARRIS_SCORE, 31,20);
 	const Eigen::Vector3d so = transform.block<3,1>(0,3);
 	const Eigen::Quaterniond sori( transform.block<3,3>(0,0) );
 
@@ -916,12 +919,12 @@ void MultiResolutionSurfelMap::addImagePointFeatures( const cv::Mat& img, const 
 	static cv::Mat last_img;
 
 	// in bytes
-	unsigned int descriptorSize = orb.descriptorSize();
+	unsigned int descriptorSize = orb->descriptorSize();
 
 	std::vector< cv::KeyPoint > detectedKeypoints, keypoints;
 	detectedKeypoints.reserve( params_.numPointFeatures );
 
-	orb.detect( img, detectedKeypoints, cv::Mat() );
+	orb->detect( img, detectedKeypoints, cv::Mat() );
 
 	std::cout << "detect: " << stopwatch_.getTimeSeconds() * 1000.0 << "\n";
 	stopwatch_.reset();
@@ -969,7 +972,7 @@ void MultiResolutionSurfelMap::addImagePointFeatures( const cv::Mat& img, const 
 	stopwatch_.reset();
 
 	cv::Mat detectedDescriptors;
-	orb.compute( img, detectedKeypoints, detectedDescriptors );
+	orb->compute( img, detectedKeypoints, detectedDescriptors );
 
 	std::cout << "extract: " << stopwatch_.getTimeSeconds() * 1000.0 << "\n";
 
@@ -1033,9 +1036,17 @@ void MultiResolutionSurfelMap::addImagePointFeatures( const cv::Mat& img, const 
 			imageCoordinates.at<float>( i, 0 ) = detectedKeypoints[i].pt.x;
 			imageCoordinates.at<float>( i, 1 ) = detectedKeypoints[i].pt.y;
 		}
-		flann::Matrix< float > indexImageCoordinates( (float*)imageCoordinates.data, detectedKeypoints.size(), 2 );
-		flann::Index< flann::L2_Simple< float > > image_index( indexImageCoordinates, flann::KDTreeSingleIndexParams() );
-		image_index.buildIndex();
+        flann::Matrix< float> indexImageCoordinates( (float *)imageCoordinates.data, detectedKeypoints.size(), 2 );
+        //orginall
+        //flann::Index< flann::L2< double > > image_index( indexImageCoordinates, flann::KDTreeSingleIndexParams());
+
+
+
+
+        flann::Index<flann::L2_Simple<float>> image_index(indexImageCoordinates,flann::KDTreeSingleIndexParams());
+
+
+        image_index.buildIndex();
 
 		std::vector< std::vector< int > > foundImageIndices;
 		std::vector< std::vector< float > > foundImageDists;
@@ -1297,7 +1308,7 @@ void MultiResolutionSurfelMap::addImagePointFeatures( const cv::Mat& img, const 
 
 	// build LSH search index for this image using LSH implementation in FLANN 1.7.1
     stopwatch_.reset();
-    flann::Matrix< unsigned char > indexDescriptors( descriptors_.data, keypoints.size(), orb.descriptorSize() );
+    flann::Matrix< unsigned char > indexDescriptors( descriptors_.data, keypoints.size(), orb->descriptorSize() );
 	lsh_index_ = boost::shared_ptr< flann::Index< flann::HammingPopcnt< unsigned char > > >( new flann::Index< flann::HammingPopcnt< unsigned char > >( indexDescriptors, flann::LshIndexParams( 2, 20, 2 ) ) );
 	lsh_index_->buildIndex();
 	delta_t = stopwatch_.getTimeSeconds() * 1000.0f;

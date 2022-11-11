@@ -42,7 +42,7 @@
 
 #include <pcl/segmentation/extract_polygonal_prism_data.h>
 #include <pcl/surface/convex_hull.h>
-
+#include "g2o/solvers/cholmod/linear_solver_cholmod.h"
 #include <g2o/core/optimization_algorithm_levenberg.h>
 
 #include <mrsmap/utilities/utilities.h>
@@ -99,18 +99,31 @@ SLAM::SLAM() {
 	lastTransform_.setIdentity();
 	lastFrameTransform_.setIdentity();
 
-	// allocating the optimizer
-	optimizer_ = new g2o::SparseOptimizer();
-	optimizer_->setVerbose(true);
-	SlamLinearSolver* linearSolver = new SlamLinearSolver();
-	linearSolver->setBlockOrdering(false);
-	SlamBlockSolver* solver = new SlamBlockSolver(linearSolver);
+    // allocating the optimizer
 
-	g2o::OptimizationAlgorithmLevenberg* solverLevenberg = new g2o::OptimizationAlgorithmLevenberg(solver);
+    optimizer_ = new g2o::SparseOptimizer();
+    optimizer_->setVerbose(true);
 
-	optimizer_->setAlgorithm( solverLevenberg );
+    /*old version
+    SlamLinearSolver* linearSolver = new SlamLinearSolver();
+    linearSolver->setBlockOrdering(false);
+    SlamBlockSolver* solver = new SlamBlockSolver(linearSolver);
+    g2o::OptimizationAlgorithmLevenberg* solverLevenberg = new g2o::OptimizationAlgorithmLevenberg(solver);
+    */
 
-	deltaIncTransform_.setIdentity();
+
+    auto linearSolver = g2o::make_unique<g2o::LinearSolverCholmod<SlamBlockSolver::PoseMatrixType>>();
+
+    linearSolver->setBlockOrdering(false);
+
+    auto solver = g2o::make_unique<SlamBlockSolver>(std::move(linearSolver));
+
+
+    g2o::OptimizationAlgorithmLevenberg* solverLevenberg = new g2o::OptimizationAlgorithmLevenberg(std::move(solver));
+
+    optimizer_->setAlgorithm( solverLevenberg );
+
+    deltaIncTransform_.setIdentity();
 }
 
 SLAM::~SLAM() {

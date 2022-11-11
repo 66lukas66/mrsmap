@@ -38,6 +38,7 @@
 #ifndef MULTIRESOLUTION_SURFEL_MAP_H_
 #define MULTIRESOLUTION_SURFEL_MAP_H_
 
+#include <flann/flann.h>
 #include <Eigen/Core>
 #include <Eigen/Eigen>
 
@@ -67,12 +68,12 @@
 
 #include <pcl/common/time.h>
 
+
 #include <opencv2/opencv.hpp>
 
 #include <tbb/tbb.h>
 #include <tbb/concurrent_queue.h>
 
-#include <flann/flann.h>
 
 #define MIN_NUM_POINTS_PER_SURFEL 10
 

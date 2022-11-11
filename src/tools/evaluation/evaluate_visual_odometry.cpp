@@ -378,10 +378,10 @@ public:
 //						continue;
 
 					// load images
-					cv::Mat depthImg = cv::imread( path_ + "/" + entryStrs[1], CV_LOAD_IMAGE_ANYDEPTH );
-					cv::Mat rgbImg = cv::imread( path_ + "/" + entryStrs[3], CV_LOAD_IMAGE_ANYCOLOR );
+					cv::Mat depthImg = cv::imread( path_ + "/" + entryStrs[1], cv::IMREAD_ANYDEPTH );
+					cv::Mat rgbImg = cv::imread( path_ + "/" + entryStrs[3], cv::IMREAD_ANYCOLOR  );
 
-//					cv::Mat depthVizImg = mrsmap::visualizeDepth( depthImg, 0.f, 5.f*5000.f );
+                    //					cv::Mat depthVizImg = mrsmap::visualizeDepth( depthImg, 0.f, 5.f*5000.f );
 ////					cv::imshow( "depth", depthVizImg );
 ////					cv::waitKey(20);
 //					cv::imwrite( "depth400.png", depthVizImg );

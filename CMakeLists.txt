@@ -14,7 +14,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
   add_definitions(-Wall -funroll-loops -momit-leaf-frame-pointer -fomit-frame-pointer -floop-block -ftree-loop-distribution -ftree-loop-linear -floop-interchange -floop-strip-mine -fgcse-lm -fgcse-sm -fsched-spec-load)
 endif()
 
-add_definitions( -std=c++0x )
+add_definitions( -std=c++17 )
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" ${CMAKE_MODULE_PATH})
 
@@ -60,8 +60,10 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 message("${OpenCV_INCLUDE_DIRS}")
 
 # G2O required
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 find_package(G2O REQUIRED)
 include_directories(${G2O_INCLUDE_DIR})
+
 
 find_package( Boost 1.40 COMPONENTS program_options REQUIRED )
 include_directories( ${Boost_INCLUDE_DIR} )
@@ -134,7 +136,7 @@ target_link_libraries( mrsslam mrsmap ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} $
 # -- evaluate_visual_odometry for evaluation of visual odometry performance on RGBD dataset
 add_executable( evaluate_visual_odometry src/tools/evaluation/evaluate_visual_odometry.cpp )
 add_definitions( ${SSE_FLAGS} )
-target_link_libraries( evaluate_visual_odometry mrsmap ${Boost_PROGRAM_OPTIONS_LIBRARY} )
+target_link_libraries( evaluate_visual_odometry mrsmap ${Boost_PROGRAM_OPTIONS_LIBRARY}  )
 
 
 # -- evaluate_visual_odometry_batch for evaluation of visual odometry performance on multiple RGBD datasets
@@ -146,5 +148,8 @@ target_link_libraries( evaluate_visual_odometry_batch mrsmap ${Boost_PROGRAM_OPT
 # -- evaluate_slam for evaluation of slam performance on RGBD dataset
 add_executable( evaluate_slam src/tools/evaluation/evaluate_slam.cpp )
 add_definitions( ${SSE_FLAGS} )
-target_link_libraries( evaluate_slam mrsslam ${Boost_PROGRAM_OPTIONS_LIBRARY} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CSPARSE} ${G2O_SOLVER_CSPARSE_EXTENSION} ${G2O_TYPES_SLAM3D} )
+target_link_libraries( evaluate_slam mrsslam ${Boost_PROGRAM_OPTIONS_LIBRARY} ${G2O_CORE_LIBRARY} ${G2O_STUFF_LIBRARY} ${G2O_SOLVER_CSPARSE} ${G2O_SOLVER_CSPARSE_EXTENSION} ${G2O_TYPES_SLAM3D} cholmod )
+
+
+
 

@@ -184,8 +184,8 @@ public:
 
 
 				// load images
-				cv::Mat depthImg = cv::imread( path_ + "/" + entryStrs[ 1 ], CV_LOAD_IMAGE_ANYDEPTH );
-				cv::Mat rgbImg = cv::imread( path_ + "/" + entryStrs[ 3 ], CV_LOAD_IMAGE_ANYCOLOR );
+				cv::Mat depthImg = cv::imread( path_ + "/" + entryStrs[ 1 ], cv::IMREAD_ANYDEPTH );
+				cv::Mat rgbImg = cv::imread( path_ + "/" + entryStrs[ 3 ], cv::IMREAD_ANYCOLOR );
 
 				// extract point cloud from image pair
 				pcl::PointCloud< pcl::PointXYZRGB >::Ptr cloud( new pcl::PointCloud< pcl::PointXYZRGB >() );
